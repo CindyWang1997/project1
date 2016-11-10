@@ -1,0 +1,27 @@
+<html>
+  	<style>
+    	body{ 
+      		font-size: 15pt;
+      		font-family: arial;
+    	}
+  	</style>
+
+  	<body>
+  		<div id = "passengerInfo">
+  			<p> Name: {{ user['name'] }} </p>
+  			<p> Gender: {{ user['gender'] }} </p>
+  			<p> Email: {{ user['email'] }} </p>
+  			<p> Age: {{ user['age'] }} </p>
+  			<p> Balance: {{ user['balance'] }} </p>
+  		</div>
+
+  		<form method="POST" action="/searchTicket">
+          	<p>Departure <input type="text" name="name"> </p>
+          	<p>Destination <input type="text" name="name"> </p>
+          	<p><input type="submit" value="Search"></p>
+      	</form>
+
+
+  	</body>
+
+</html>

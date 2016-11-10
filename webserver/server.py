@@ -18,7 +18,8 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+import datetime
+from flask import Flask, request, render_template, g, redirect, Response, session
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -38,8 +39,9 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #     DATABASEURI = "postgresql://ewu2493:foobar@<IP_OF_POSTGRE_SQL_SERVER>/postgres"
 #
 # Swap out the URI below with the URI for the database created in part 2
-DATABASEURI = "sqlite:///test.db"
-
+#DATABASEURI = "sqlite:///test.db"
+#DATABASEURI = "postgresql://xw2368:s4beh@<104.196.175.120>/postgres"
+DATABASEURI = "mysql+pymysql://root:Yue970217@localhost/airticket"
 
 #
 # This line creates a database engine that knows how to connect to the URI above
@@ -134,11 +136,11 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
-  names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
+  #cursor = g.conn.execute("SELECT name FROM test")
+  #names = []
+  #for result in cursor:
+    #names.append(result['name'])  # can also be accessed using result[0]
+  #cursor.close()
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
@@ -166,14 +168,42 @@ def index():
   #     <div>{{n}}</div>
   #     {% endfor %}
   #
-  context = dict(data = names)
+  #context = dict(data = names)
+  if not session.get('logged_in'):
+    return render_template('index.html')
+  else:
+
+    # userInfo stores information about user
+    userInfo = {}
+    
+    # cmd grep user information from Passenger table
+    cmd = 'SELECT gender, email, birth_year, balance FROM Passenger where name = (:aname) LIMIT 1'
+    cursor = g.conn.execute(text(cmd), aname = session['username'])
+    for result in cursor:
+      userInfo['name'] = session['username']
+      userInfo['gender'] = result['gender']
+      userInfo['email'] = result['email']
+      userInfo['age'] = datetime.datetime.now().year - result['birth_year']
+      userInfo['balance'] = result['balance']
+
+    context = dict(user = userInfo)
+    return render_template('main.html', **context)
+
+
+@app.route('/login', methods=['POST'])
+def do_admin_login():
+  if request.form['username']:
+      session['logged_in'] = True
+      session['username'] = request.form['username']
+      
+  return index()
 
 
   #
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html", **context)
+  #return render_template("index.html", **context)
 
 #
 # This is an example of a different path.  You can see it at
@@ -198,13 +228,8 @@ def add():
   return redirect('/')
 
 
-@app.route('/login')
-def login():
-    abort(401)
-    this_is_never_executed()
-
-
 if __name__ == "__main__":
+  app.secret_key = os.urandom(12)
   import click
 
   @click.command()
