@@ -187,6 +187,7 @@ def index():
       userInfo['balance'] = result['balance']
 
     context = dict(user = userInfo)
+    cursor.close()
     return render_template('main.html', **context)
 
 
@@ -195,9 +196,19 @@ def do_admin_login():
   if request.form['username']:
       session['logged_in'] = True
       session['username'] = request.form['username']
-      
-  return index()
 
+      cmd = 'SELECT PID from Passenger where name = (:aname) LIMIT 1'
+      cursor = g.conn.execute(text(cmd), aname = session['username'])
+      for result in cursor:
+        session['PID'] = result['PID']
+      
+  return redirect("/")
+
+@app.route('/logout')
+def do_admin_logout():
+  session.clear()
+
+  return redirect("/")
 
   #
   # render_template looks in the templates/ folder for files.
@@ -213,19 +224,67 @@ def do_admin_login():
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
 #
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
+
+@app.route('/searchATicket', methods=['GET', 'POST'])
+def do_search_ticket():
+
+  # search database for departure and destination id
+  depart = request.args.get('departID')
+  dest = request.args.get('destID')
+  output = 'Find Below Available Tickets'
+
+  cmd = """SELECT s.aid, ag.name, f.fid, c.name, f.duration, f.distance, f.dep_IATA, f.des_IATA, s.price, s.seat_remain
+        FROM Sell s join Agency ag ON s.aid = ag.aid JOIN Flight f ON s.FID = f.FID JOIN Company c ON c.cid = f.cid WHERE f.FID in
+        (SELECT f2.fid from Flight f2 join Airport a on f2.dep_iata = a.iata join Airport b on f2.des_iata = b.iata
+        WHERE (a.location = (:aDepart) and b.location = (:aDest)))"""
+  cursor = g.conn.execute(text(cmd), aDepart = depart, aDest = dest)
+  cursor.close()
 
 
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  print name
-  cmd = 'INSERT INTO test(name) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
-  return redirect('/')
+
+# This route buys a ticket
+# Update Passenger balance
+# Update Milege for the company
+# Insert into Ticket table
+# Decrease Sell remaining seats
+# reload page
+@app.route('/buyATicket', methods=['POST'])
+def buy():
+    AID=request.form['aAID']
+    FID=request.form['aFID']
+
+    # Insert into Ticket table
+    cmd_ticket = 'INSERT INTO Ticket(AID,FID,PID) VALUES ((:aAID), (:aFID), (:aPID))'
+    cursor=g.conn.execute(text(cmd_ticket), aAID=AID, aFID=FID, aPID=session['PID'])
+    cursor.close()
+
+    # Update Passenger Balance
+    cmd_price ='SELECT price from Sell WHERE AID = (:aAID) and FID = (:aFID) LIMIT 1'
+    cursor = g.conn.execute(text(cmd_price), aAID=AID, aFID=FID)
+    r_price=0     # Ticket price
+    for result in cursor:
+        r_price=result['price']
+    cursor.close()
+
+    cmd_balance='UPDATE Passenger p SET p.balance = p.balance - (:r_price) where p.PID=(:PID)'
+    cursor = g.conn.execute(text(cmd_balance), r_price=r_price, PID=session['PID'])
+    cursor.close()
+
+    return redirect("/")
+
+    ##(milege++)
+    #cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
+    #cursor=g.conn.execute(cmd,FID=FID)
+    #distance=0
+    #for result in cursor:
+     #   distance=result
+    #cursor.close()
+
+    #cmd_millege='UPDATE Millage where Millage.PID=(:PID) and MIllage.CID=(:CID) SET mile = mile + (:distance)'
+    #cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
+    #cursor.close()
+
+
 
 
 if __name__ == "__main__":

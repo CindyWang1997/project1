@@ -15,12 +15,39 @@
   			<p> Balance: {{ user['balance'] }} </p>
   		</div>
 
-  		<form method="POST" action="/searchTicket">
-          	<p>Departure <input type="text" name="name"> </p>
-          	<p>Destination <input type="text" name="name"> </p>
-          	<p><input type="submit" value="Search"></p>
+
+  		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+  		<script type="text/javascript">
+    		$("#searchTicket").submit(function() {
+         		$.ajax({
+			        type: "GET",
+			        url: "/searchATicket",
+			        contentType: "application/xml; charset=utf-8",
+			        data: { departID: $('input[name="departure"]').val(), destID: $('input[name="destination"]').val()},
+			        success: function(data) {
+		                $('#searchResult').text(data);
+		            },
+		            error: function(jqXHR, textStatus, errorThrown) {
+			            alert(errorThrown);
+			        }
+        		});     
+    		});
+		</script>
+
+  		<form method="POST" id="searchTicket">
+          	<p>Departure City <input type="text" name="departure", placeholder="Departure City"> </p>
+          	<p>Destination City <input type="text" name="destination", placeholder="Destination City"> </p>
+          	<p><input type="submit" value="Search" name="searchBtn"></p>
+      	</form>
+      	<div id = "searchResult"></div>
+
+      	<form method="POST" id="buyTicket" action="/buyATicket">
+      		<p>AID <input type="text" name="aAID" placeholder="AID"></p>
+      		<p>FID <input type="text" name="aFID" placeholder="FID"></p>
+      		<p><input type="submit" value="Buy" name="buyBtn"></p>
       	</form>
 
+      	<p><a href="/logout">logout</a></p>
 
   	</body>
 
