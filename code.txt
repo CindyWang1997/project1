@@ -11,7 +11,7 @@ def buy()
         r_price=result
     cursor.close()
 
-    cmd_balance='UPDATE Passenger where SET balance = balance - (:r_price) Passenger.PID=(:PID);'
+    cmd_balance='UPDATE Passenger  SET balance = balance - (:r_price) where Passenger.PID=(:PID);'
     cursor = g.conn.execute(cmd_balance,PID=PID,r_price=r_price)
     cursor.close()
 
