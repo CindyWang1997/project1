@@ -1,0 +1,28 @@
+def buy()
+    AID=request.form['Agency ID']
+    FID=request.form['Fight']
+    ##CID and PID request?
+    cmd = 'INSERT INTO Ticket VALUES (select * from sell where AID=(:AID) and FID=(:FID));'
+    ##(balance--price)
+    cmd_price='SELECT Sell.price from Sell where Sell.AID = (:AID) and Sell.FID=(:FID) LIMIT 1;'
+    cursor =g.conn.execute(cmd_price,AID=AID,FID=FID)
+    r_price=0
+    for result in cursor:
+        r_price=result
+    cursor.close()
+
+    cmd_balance='UPDATE Passenger where SET balance = balance - (:r_price) Passenger.PID=(:PID);'
+    cursor = g.conn.execute(cmd_balance,PID=PID,r_price=r_price)
+    cursor.close()
+
+    ##(milege++)
+    cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
+    cursor=g.conn.execute(cmd,FID=FID)
+    distance=0
+    for result in cursor:
+        distance=result
+    cursor.close()
+
+    cmd_millege='UPDATE Millage where Millage.PID=(:PID) and MIllage.CID=(:CID) SET mile = mile + (:distance)'
+    cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
+    cursor.close()
