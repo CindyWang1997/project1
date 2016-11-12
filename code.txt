@@ -1,8 +1,10 @@
-def buy()
+def buy():
     AID=request.form['Agency ID']
     FID=request.form['Fight']
-    ##CID and PID request?
-    cmd = 'INSERT INTO Ticket VALUES (select * from sell where AID=(:AID) and FID=(:FID));'
+    ##insert TID request?
+    cmd_ticket = 'INSERT INTO Ticket VALUES (,AID=(:AID),FID=(:FID),PID=(:PID));'
+    cursor=g.conn.execute(cmd_ticket,AID=AID,FID=FID,PID=PID)
+    cursor.close()
     ##(balance--price)
     cmd_price='SELECT Sell.price from Sell where Sell.AID = (:AID) and Sell.FID=(:FID) LIMIT 1;'
     cursor =g.conn.execute(cmd_price,AID=AID,FID=FID)
@@ -15,14 +17,24 @@ def buy()
     cursor = g.conn.execute(cmd_balance,PID=PID,r_price=r_price)
     cursor.close()
 
-    ##(milege++)
+    ##(milege++distance)
     cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
     cursor=g.conn.execute(cmd,FID=FID)
     distance=0
     for result in cursor:
         distance=result
     cursor.close()
+    
+    cmd_check=
+'if NOT exists(select * from Millege where PID=(:PID) and CID=CID(:CID)) BEGIN INSERT INTO Milege(Air_miles,PID,CID) VALUES (0,(:PID),(CID)) END '
+    cursor =g.conn.execute(cmd_check,PID=PID,CID=CID)
+    cursor.close()
 
-    cmd_millege='UPDATE Millage where Millage.PID=(:PID) and MIllage.CID=(:CID) SET mile = mile + (:distance)'
+    cmd_millege='UPDATE Millage  SET mile = mile + (:distance) where Millage.PID=(:PID) and MIllage.CID=(:CID)'
     cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
     cursor.close()
+
+    ##(seat--)
+    cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
+    cursor =g.conn.execute(cmd_seat,AID=AID,FID=FID)
+    cursor.close()   
