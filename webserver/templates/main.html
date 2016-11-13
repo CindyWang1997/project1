@@ -3,57 +3,60 @@
   	<head>
       	<meta charset="UTF-8" />
       	<style>
-        body{ 
-            font-size: 15pt;
-            font-family: arial;
-        }
+            body {
+                font-family: "Tenor Sans", sans-serif;
+            }
       	</style>
     </head>
 
   	<body>
-  		<div id = "passengerInfo">
-  			<p> Name: {{ user['name'] }} </p>
-  			<p> Gender: {{ user['gender'] }} </p>
-  			<p> Email: {{ user['email'] }} </p>
-  			<p> Age: {{ user['age'] }} </p>
-  			<p> Balance: {{ user['balance'] }} </p>
-  		</div>
+    		<div id = "passengerInfo">
+    			<p> Name: {{ user['name'] }} </p>
+    			<p> Gender: {{ user['gender'] }} </p>
+    			<p> Email: {{ user['email'] }} </p>
+    			<p> Age: {{ user['age'] }} </p>
+    			<p> Balance: {{ user['balance'] }} </p>
+    		</div>
 
 
-  		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-  		<script type="text/javascript">
-    		function searchAirTicket() {
-         		$.ajax({
-			        type: "GET",
-			        url: "/searchATicket",
-			        contentType: "application/xml; charset=utf-8",
-			        data: $("#searchTicket").serialize(),
-			        success: function(data) {
-		                $('#searchResult').text(data);
-		                return true;
-		            },
-		            error: function(jqXHR, textStatus, errorThrown) {
-			            alert(errorThrown);
-			            return false;
-			        }
-        		});
-        	}
-		</script>
+    		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    		<script type="text/javascript">
+      		function searchAirTicket() {
+           		$.ajax({
+  			        type: "GET",
+  			        url: "/searchATicket",
+  			        contentType: "application/xml; charset=utf-8",
+  			        data: $("#searchTicket").serialize(),
+  			        success: function(data) {
+  		                $('#searchResult').html(data);
+  		            },
+  		            error: function(jqXHR, textStatus, errorThrown) {
+  			            alert(errorThrown);
+  			        }
+          		});
+           		return false;
+          	}
+  		  </script>
 
-  		<form method="POST" id="searchTicket" onsubmit="return searchAirTicket()">
-          	<p>Departure City <input type="text" name="departure", placeholder="Departure City"> </p>
-          	<p>Destination City <input type="text" name="destination", placeholder="Destination City"> </p>
-          	<p><input type="submit" value="Search" name="searchBtn"></p>
-      	</form>
-      	<div id = "searchResult"></div>
 
-      	<form method="POST" id="buyTicket" action="/buyATicket">
-      		<p>AID <input type="text" name="aAID" placeholder="AID"></p>
-      		<p>FID <input type="text" name="aFID" placeholder="FID"></p>
-      		<p><input type="submit" value="Buy" name="buyBtn"></p>
-      	</form>
+        <div id = "searchForm" align="center">
+      		<form id="searchTicket" onsubmit="return searchAirTicket()">
+              <p>Departure City <input type="text" name="departure", placeholder="Departure City"> </p>
+              <p>Destination City <input type="text" name="destination", placeholder="Destination City"> </p>
+              <p><input type="submit" value="Search" name="searchBtn"></p>
+          </form>
+        	<div id = "searchResult"></div>
+        </div>
 
-      	<p><a href="/logout">logout</a></p>
+        <div id = "buyForm" align="center">
+          	<form method="POST" id="buyTicket" action="/buyATicket">
+            		<p>AID <input type="text" name="aAID" placeholder="AID"></p>
+            		<p>FID <input type="text" name="aFID" placeholder="FID"></p>
+            		<p><input type="submit" value="Buy" name="buyBtn"></p>
+          	</form>
+        </div>
+
+        <p><a href="/logout">logout</a></p>
 
   	</body>
 

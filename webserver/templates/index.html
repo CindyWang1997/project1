@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-      <meta charset="UTF-8" />
-      <style>
-        body{ 
-            font-size: 15pt;
-            font-family: arial;
-        }
-      </style>
+        <meta charset="UTF-8" />
+        <title>Ticket Booking Login</title>
+        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     </head>
 
-    <body>
+    <body background="{{ url_for('static', filename='LoginPlane.jpg') }}">
+      <h1>Airticket Booking Management</h1>
       {% block body %}
           {% if session['logged_in'] %}
               <p>You're logged in already!</p>
           {% else %}
-          <form action="/login" method="POST">
-              <input type="username" name="username" placeholder="Username">
-              <input type="submit" value="Log in">
-          </form>
+          <div class="container">
+            <div class="login">
+                <h1 class="login-heading">
+                <strong>Welcome.</strong> Please login.</h1>
+                <form action="/login" method="POST">
+                    <input type="username" name="username" placeholder="Username" class="input-txt">
+                    <div class="login-footer">
+                      <button type="submit" class = "btn btn--right">LOG IN</button>
+                    </div>
+                </form>
+            <div class="login">
+          </div>
           {% endif %}
       {% endblock %}
 

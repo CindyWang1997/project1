@@ -231,15 +231,34 @@ def do_search_ticket():
   # search database for departure and destination id
   depart = request.args.get('departure')
   dest = request.args.get('destination')
-  output = 'Find Below Available Tickets'
+  output = 'Find Below Available Tickets <br>'
+  output = output + \
+          """<table style="width:100%">
+                <tr>
+                  <th>Agency ID</th>
+                  <th>Agency Name</th> 
+                  <th>Flight ID</th>
+                  <th>Company</th>
+                </tr>
+          """
 
   cmd = """SELECT s.aid, ag.name, f.fid, c.name, f.duration, f.distance, f.dep_IATA, f.des_IATA, s.price, s.seat_remain
         FROM Sell s join Agency ag ON s.aid = ag.aid JOIN Flight f ON s.FID = f.FID JOIN Company c ON c.cid = f.cid WHERE f.FID in
         (SELECT f2.fid from Flight f2 join Airport a on f2.dep_iata = a.iata join Airport b on f2.des_iata = b.iata
         WHERE (a.location = (:aDepart) and b.location = (:aDest)))"""
   cursor = g.conn.execute(text(cmd), aDepart = depart, aDest = dest)
+
+  for result in cursor:
+    output = output + '<tr>' + \
+                        '<th>' + result['s.aid'] + '</th>' + \
+                        '<th>' + result['ag.name'] + '</th>' + \
+                        '<th>' + result['f.fid'] + '</th>' + \
+                        '<th>' + result['c.name'] + '</th>' + \
+                      '<tr>'
+
+  output = output + '</table>'  
   cursor.close()
-  return "Hello"
+  return output
 
 
 # This route buys a ticket
@@ -252,6 +271,10 @@ def do_search_ticket():
 def buy():
     AID=request.form['aAID']
     FID=request.form['aFID']
+
+    # Decrease remaining seats if there still are
+
+
 
     # Insert into Ticket table
     cmd_ticket = 'INSERT INTO Ticket(AID,FID,PID) VALUES ((:aAID), (:aFID), (:aPID))'
@@ -270,7 +293,7 @@ def buy():
     cursor = g.conn.execute(text(cmd_balance), r_price=r_price, PID=session['PID'])
     cursor.close()
 
-    return redirect("/")
+    
 
     ##(milege++)
     #cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
@@ -283,7 +306,7 @@ def buy():
     #cmd_millege='UPDATE Millage where Millage.PID=(:PID) and MIllage.CID=(:CID) SET mile = mile + (:distance)'
     #cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
     #cursor.close()
-
+    return redirect("/")
 
 
 
