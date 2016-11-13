@@ -49,3 +49,9 @@ def buy():
     cmd_topup = 'UPDATE Passenger SET balance = balance + (:topup) where Passenger.PID=(:PID)'
     cursor = g.conn.execute(cmd_balance, topup=topup, PID=session(PID))
     cursor.close()
+    
+    ##I want to go anywhere but butler library(which i can afford)
+    location=request.form['location']
+    cmd_go=SELECT S.AID,S.FID,S.price FROM Sell S LEFT OUTER JOIN Flight F ON S.FID=F.FID LEFT OUTER JOIN Airport A ON F.dep_IATA=A.IATA,Passenger P WHERE A.location=(:location) AND S.price <= P.balance AND P.PID=(:PID);
+    cursor = g.conn.execute(cmd_go, location=location, PID=session(PID))
+    cursor.close()
