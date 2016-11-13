@@ -57,7 +57,7 @@ def buy():
     cursor.close()
     
     ##show Milege
-    cmd_sm='SELECT M.CID,C.name,C.location FROM Milege M Join Company C on M.CID = C.CID WHERE M.PID=(:PID)'
+    cmd_sm='SELECT M.CID,C.name,C.location,,M.air_miles FROM Milege M Join Company C on M.CID = C.CID WHERE M.PID=(:PID)'
     cursor = g.conn.excute(cmd_sm, PID=session(PID))
     r_milege=[]
     for result in cursor:
