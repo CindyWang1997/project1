@@ -38,3 +38,14 @@ def buy():
     cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
     cursor =g.conn.execute(cmd_seat,AID=AID,FID=FID)
     cursor.close()   
+
+
+
+
+
+############
+    ##(balance+topup)
+    topup=request.form['top up']
+    cmd_topup = 'UPDATE Passenger SET balance = balance + (:topup) where Passenger.PID=(:PID)'
+    cursor = g.conn.execute(cmd_balance, topup=topup, PID=session(PID))
+    cursor.close()
