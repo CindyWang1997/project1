@@ -9,8 +9,9 @@
       	</style>
     </head>
 
-  	<body>
-    		<div id = "passengerInfo">
+  	<body background="{{ url_for('static', filename='mainSearch.jpg') }}">
+        <h1 align="center">Welcome, {{ user['name'] }}! Where do you want to go?</h1>
+    		<div id = "passengerInfo">  
     			<p> Name: {{ user['name'] }} </p>
     			<p> Gender: {{ user['gender'] }} </p>
     			<p> Email: {{ user['email'] }} </p>
@@ -18,6 +19,7 @@
     			<p> Balance: {{ user['balance'] }} </p>
     		</div>
 
+        <p><a href="/logout">logout</a></p>
 
     		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
     		<script type="text/javascript">
@@ -50,13 +52,12 @@
 
         <div id = "buyForm" align="center">
           	<form method="POST" id="buyTicket" action="/buyATicket">
-            		<p>AID <input type="text" name="aAID" placeholder="AID"></p>
-            		<p>FID <input type="text" name="aFID" placeholder="FID"></p>
+            		<p>Agency ID <input type="text" name="aAID" placeholder="AID"></p>
+            		<p>Flight ID <input type="text" name="aFID" placeholder="FID"></p>
             		<p><input type="submit" value="Buy" name="buyBtn"></p>
           	</form>
         </div>
 
-        <p><a href="/logout">logout</a></p>
 
   	</body>
 

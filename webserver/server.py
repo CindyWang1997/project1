@@ -239,6 +239,12 @@ def do_search_ticket():
                   <th>Agency Name</th> 
                   <th>Flight ID</th>
                   <th>Company</th>
+                  <th>Duration</th>
+                  <th>Distance</th>
+                  <th>Departure Airport</th>
+                  <th>Destination Airtport</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
                 </tr>
           """
 
@@ -250,10 +256,16 @@ def do_search_ticket():
 
   for result in cursor:
     output = output + '<tr>' + \
-                        '<th>' + result['s.aid'] + '</th>' + \
-                        '<th>' + result['ag.name'] + '</th>' + \
-                        '<th>' + result['f.fid'] + '</th>' + \
-                        '<th>' + result['c.name'] + '</th>' + \
+                        '<th>' + str(result[0]) + '</th>' + \
+                        '<th>' + result[1] + '</th>' + \
+                        '<th>' + result[2] + '</th>' + \
+                        '<th>' + result[3] + '</th>' + \
+                        '<th>' + str(result[4]) + '</th>' + \
+                        '<th>' + str(result[5]) + '</th>' + \
+                        '<th>' + str(result[6]) + '</th>' + \
+                        '<th>' + str(result[7]) + '</th>' + \
+                        '<th>' + str(result[8]) + '</th>' + \
+                        '<th>' + str(result[9]) + '</th>' + \
                       '<tr>'
 
   output = output + '</table>'  
@@ -273,7 +285,7 @@ def buy():
     FID=request.form['aFID']
 
     # Decrease remaining seats if there still are
-
+    cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
 
 
     # Insert into Ticket table
