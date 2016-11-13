@@ -55,3 +55,11 @@ def buy():
     cmd_go=SELECT S.AID,S.FID,S.price FROM Sell S LEFT OUTER JOIN Flight F ON S.FID=F.FID LEFT OUTER JOIN Airport A ON F.dep_IATA=A.IATA,Passenger P WHERE A.location=(:location) AND S.price <= P.balance AND P.PID=(:PID);
     cursor = g.conn.execute(cmd_go, location=location, PID=session(PID))
     cursor.close()
+    
+    ##show Milege
+    cmd_sm='SELECT M.CID,C.name,C.location FROM Milege M Join Company C on M.CID = C.CID WHERE M.PID=(:PID)'
+    cursor = g.conn.excute(cmd_sm, PID=session(PID))
+    r_milege=[]
+    for result in cursor:
+        r_milege=r_milege.append(result)
+    cursor.close()
