@@ -72,3 +72,35 @@ def buy():
     for result in cursor:
         r_ticket=r_ticket.append(result)
     cursor.close()
+    
+    
+    ##(milege++distance)
+    cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
+    cursor=g.conn.execute(cmd,FID=FID)
+    distance=0
+    for result in cursor:
+        distance=result
+    cursor.close()
+    
+    cmd_check=
+'SELECT COUNT(*) from Millege M where M.PID=(:PID) AND M.CID=(:CID)'
+    cursor =g.conn.execute(cmd_check,PID=session(PID),CID=cid)
+    check=0
+    for result in cursor:
+        check=result['COUNT(*)']
+    cursor.close()
+    
+    if(check==0):
+        cmd_insert='INSERT INTO Milege(Air_miles,PID,CID) VALUES (0,(:PID),(:CID))'
+        cursor=g.conn.execute(cmd_insert,PID=session(PID),CID=cid)
+    cursor.close()
+       
+
+    cmd_millege='UPDATE Millage SET mile = mile + (:distance) where Millage.PID=(:PID) and MIllage.CID=(:CID)'
+    cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
+    cursor.close()
+
+    ##(seat--)
+    cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
+    cursor =g.conn.execute(cmd_seat,AID=AID,FID=FID)
+    cursor.close()
