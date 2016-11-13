@@ -225,12 +225,12 @@ def do_admin_logout():
 # the functions for each app.route needs to have different names
 #
 
-@app.route('/searchATicket', methods=['GET', 'POST'])
+@app.route('/searchATicket', methods=['GET'])
 def do_search_ticket():
 
   # search database for departure and destination id
-  depart = request.args.get('departID')
-  dest = request.args.get('destID')
+  depart = request.args.get('departure')
+  dest = request.args.get('destination')
   output = 'Find Below Available Tickets'
 
   cmd = """SELECT s.aid, ag.name, f.fid, c.name, f.duration, f.distance, f.dep_IATA, f.des_IATA, s.price, s.seat_remain
@@ -239,7 +239,7 @@ def do_search_ticket():
         WHERE (a.location = (:aDepart) and b.location = (:aDest)))"""
   cursor = g.conn.execute(text(cmd), aDepart = depart, aDest = dest)
   cursor.close()
-
+  return "Hello"
 
 
 # This route buys a ticket

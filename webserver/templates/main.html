@@ -1,10 +1,14 @@
-<html>
-  	<style>
-    	body{ 
-      		font-size: 15pt;
-      		font-family: arial;
-    	}
-  	</style>
+<!DOCTYPE html>
+<html lang="en">
+  	<head>
+      	<meta charset="UTF-8" />
+      	<style>
+        body{ 
+            font-size: 15pt;
+            font-family: arial;
+        }
+      	</style>
+    </head>
 
   	<body>
   		<div id = "passengerInfo">
@@ -18,23 +22,25 @@
 
   		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
   		<script type="text/javascript">
-    		$("#searchTicket").submit(function() {
+    		function searchAirTicket() {
          		$.ajax({
 			        type: "GET",
 			        url: "/searchATicket",
 			        contentType: "application/xml; charset=utf-8",
-			        data: { departID: $('input[name="departure"]').val(), destID: $('input[name="destination"]').val()},
+			        data: $("#searchTicket").serialize(),
 			        success: function(data) {
 		                $('#searchResult').text(data);
+		                return true;
 		            },
 		            error: function(jqXHR, textStatus, errorThrown) {
 			            alert(errorThrown);
+			            return false;
 			        }
-        		});     
-    		});
+        		});
+        	}
 		</script>
 
-  		<form method="POST" id="searchTicket">
+  		<form method="POST" id="searchTicket" onsubmit="return searchAirTicket()">
           	<p>Departure City <input type="text" name="departure", placeholder="Departure City"> </p>
           	<p>Destination City <input type="text" name="destination", placeholder="Destination City"> </p>
           	<p><input type="submit" value="Search" name="searchBtn"></p>
