@@ -63,3 +63,12 @@ def buy():
     for result in cursor:
         r_milege=r_milege.append(result)
     cursor.close()
+    
+    
+    ##show Tickets I have bought
+    cmd_st='SELECT T.PID,T.TID,T.AID,T.FID,F.des_IATA,F.des_IATA,F.duration,F.distance FROM Ticket T JOIN Flight F ON T.FID=F.FID WHERE T.PID=(:PID)'
+    cursor = g.conn.excute(cmd_st, PID=session(PID))
+    r_ticket=[]
+    for result in cursor:
+        r_ticket=r_ticket.append(result)
+    cursor.close()
