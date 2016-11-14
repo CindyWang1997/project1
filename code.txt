@@ -38,3 +38,69 @@ def buy():
     cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
     cursor =g.conn.execute(cmd_seat,AID=AID,FID=FID)
     cursor.close()   
+
+
+
+
+
+############
+    ##(balance+topup)
+    topup=request.form['top up']
+    cmd_topup = 'UPDATE Passenger SET balance = balance + (:topup) where Passenger.PID=(:PID)'
+    cursor = g.conn.execute(cmd_balance, topup=topup, PID=session(PID))
+    cursor.close()
+    
+    ##I want to go anywhere but butler library(which i can afford)
+    location=request.form['location']
+    cmd_go=SELECT S.AID,S.FID,S.price FROM Sell S LEFT OUTER JOIN Flight F ON S.FID=F.FID LEFT OUTER JOIN Airport A ON F.dep_IATA=A.IATA,Passenger P WHERE A.location=(:location) AND S.price <= P.balance AND P.PID=(:PID);
+    cursor = g.conn.execute(cmd_go, location=location, PID=session(PID))
+    cursor.close()
+    
+    ##show Milege
+    cmd_sm='SELECT M.CID,C.name,C.location,,M.air_miles FROM Milege M Join Company C on M.CID = C.CID WHERE M.PID=(:PID)'
+    cursor = g.conn.excute(cmd_sm, PID=session(PID))
+    r_milege=[]
+    for result in cursor:
+        r_milege=r_milege.append(result)
+    cursor.close()
+    
+    
+    ##show Tickets I have bought
+    cmd_st='SELECT T.PID,T.TID,T.AID,T.FID,F.des_IATA,F.des_IATA,F.duration,F.distance FROM Ticket T JOIN Flight F ON T.FID=F.FID WHERE T.PID=(:PID)'
+    cursor = g.conn.excute(cmd_st, PID=session(PID))
+    r_ticket=[]
+    for result in cursor:
+        r_ticket=r_ticket.append(result)
+    cursor.close()
+    
+    
+    ##(milege++distance)
+    cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
+    cursor=g.conn.execute(cmd,FID=FID)
+    distance=0
+    for result in cursor:
+        distance=result
+    cursor.close()
+    
+    cmd_check=
+'SELECT COUNT(*) from Millege M where M.PID=(:PID) AND M.CID=(:CID)'
+    cursor =g.conn.execute(cmd_check,PID=session(PID),CID=cid)
+    check=0
+    for result in cursor:
+        check=result['COUNT(*)']
+    cursor.close()
+    
+    if(check==0):
+        cmd_insert='INSERT INTO Milege(Air_miles,PID,CID) VALUES (0,(:PID),(:CID))'
+        cursor=g.conn.execute(cmd_insert,PID=session(PID),CID=cid)
+    cursor.close()
+       
+
+    cmd_millege='UPDATE Millage SET mile = mile + (:distance) where Millage.PID=(:PID) and MIllage.CID=(:CID)'
+    cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
+    cursor.close()
+
+    ##(seat--)
+    cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
+    cursor =g.conn.execute(cmd_seat,AID=AID,FID=FID)
+    cursor.close()
