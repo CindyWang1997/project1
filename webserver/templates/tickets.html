@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  	<head>
+      	<meta charset="UTF-8" />
+      	<style>
+            body {
+                font-family: "Tenor Sans", sans-serif;
+            }
+      	</style>
+      	<title>Your Tickets</title>
+    </head>
+
+    <body>
+	    <div>
+		    {% for ticket in allTickets %}
+		    	<div>{{ticket[0]}} {{ticket[1]}} {{ticket[2]}} {{ticket[3]}} {{ticket[4]}} {{ticket[5]}} {{ticket[6]}}</div>
+		    {% endfor %}
+  		</div>
+
+    </body>
+</html>

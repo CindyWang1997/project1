@@ -19,7 +19,7 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 import datetime
-from flask import Flask, request, render_template, g, redirect, Response, session
+from flask import Flask, flash, request, render_template, g, redirect, Response, session
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -132,43 +132,6 @@ def index():
   # DEBUG: this is debugging code to see what request looks like
   print request.args
 
-
-  #
-  # example of a database query
-  #
-  #cursor = g.conn.execute("SELECT name FROM test")
-  #names = []
-  #for result in cursor:
-    #names.append(result['name'])  # can also be accessed using result[0]
-  #cursor.close()
-
-  #
-  # Flask uses Jinja templates, which is an extension to HTML where you can
-  # pass data to a template and dynamically generate HTML based on the data
-  # (you can think of it as simple PHP)
-  # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
-  #
-  # You can see an example template in templates/index.html
-  #
-  # context are the variables that are passed to the template.
-  # for example, "data" key in the context variable defined below will be 
-  # accessible as a variable in index.html:
-  #
-  #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
-  #     <div>{{data}}</div>
-  #     
-  #     # creates a <div> tag for each element in data
-  #     # will print: 
-  #     #
-  #     #   <div>grace hopper</div>
-  #     #   <div>alan turing</div>
-  #     #   <div>ada lovelace</div>
-  #     #
-  #     {% for n in data %}
-  #     <div>{{n}}</div>
-  #     {% endfor %}
-  #
-  #context = dict(data = names)
   if not session.get('logged_in'):
     return render_template('index.html')
   else:
@@ -210,20 +173,7 @@ def do_admin_logout():
 
   return redirect("/")
 
-  #
-  # render_template looks in the templates/ folder for files.
-  # for example, the below file reads template/index.html
-  #
-  #return render_template("index.html", **context)
 
-#
-# This is an example of a different path.  You can see it at
-# 
-#     localhost:8111/another
-#
-# notice that the functio name is another() rather than index()
-# the functions for each app.route needs to have different names
-#
 
 @app.route('/searchATicket', methods=['GET'])
 def do_search_ticket():
@@ -285,40 +235,82 @@ def buy():
     FID=request.form['aFID']
 
     # Decrease remaining seats if there still are
-    cmd_seat='UPDATE Sell SET  seat_remain = seat_remain -1 where Sell.AID=(:AID) and Sell.FID=(:FID)'
-
-
-    # Insert into Ticket table
-    cmd_ticket = 'INSERT INTO Ticket(AID,FID,PID) VALUES ((:aAID), (:aFID), (:aPID))'
-    cursor=g.conn.execute(text(cmd_ticket), aAID=AID, aFID=FID, aPID=session['PID'])
-    cursor.close()
-
-    # Update Passenger Balance
-    cmd_price ='SELECT price from Sell WHERE AID = (:aAID) and FID = (:aFID) LIMIT 1'
-    cursor = g.conn.execute(text(cmd_price), aAID=AID, aFID=FID)
-    r_price=0     # Ticket price
+    cmd_remain = 'SELECT `seat_remain` FROM Sell s WHERE s.AID=(:aAID) and s.FID=(:aFID) LIMIT 1'
+    cursor = g.conn.execute(text(cmd_remain), aAID=AID, aFID=FID)
+    r_remain=0
     for result in cursor:
-        r_price=result['price']
+        r_remain = result[0]
     cursor.close()
 
-    cmd_balance='UPDATE Passenger p SET p.balance = p.balance - (:r_price) where p.PID=(:PID)'
-    cursor = g.conn.execute(text(cmd_balance), r_price=r_price, PID=session['PID'])
-    cursor.close()
+    # Check if there is still remaining seat
+    if (r_remain <= 0):
 
-    
+        # No enough Seat, alarm the user
+        flash('This Ticket Is Not Available!')
 
-    ##(milege++)
-    #cmd_distance='SELECT Flight.distance from Flight where Flight.FID = (:FID)'
-    #cursor=g.conn.execute(cmd,FID=FID)
-    #distance=0
-    #for result in cursor:
-     #   distance=result
-    #cursor.close()
+    else:
+        cmd_seat='UPDATE Sell s SET seat_remain = seat_remain -1 where s.AID=(:aAID) and s.FID=(:aFID)'
+        g.conn.execute(text(cmd_seat), aAID=AID, aFID=FID)
 
-    #cmd_millege='UPDATE Millage where Millage.PID=(:PID) and MIllage.CID=(:CID) SET mile = mile + (:distance)'
-    #cursor =g.conn.execute(cmd_millege,PID=PID,CID=CID,distance=distance)
-    #cursor.close()
+        # Cannot just delete row from Sell othewise, ticket foreign key constraint fails
+
+        # Insert into Ticket table
+        cmd_ticket = 'INSERT INTO Ticket(AID,FID,PID) VALUES ((:aAID), (:aFID), (:aPID))'
+        cursor=g.conn.execute(text(cmd_ticket), aAID=AID, aFID=FID, aPID=session['PID'])
+        cursor.close()
+
+        # Update Passenger Balance
+        cmd_price ='SELECT price from Sell WHERE AID = (:aAID) and FID = (:aFID) LIMIT 1'
+        cursor = g.conn.execute(text(cmd_price), aAID=AID, aFID=FID)
+        r_price=0     # Ticket price
+        for result in cursor:
+            r_price=result['price']
+        cursor.close()
+
+        cmd_balance='UPDATE Passenger p SET p.balance = p.balance - (:r_price) where p.PID=(:PID)'
+        cursor = g.conn.execute(text(cmd_balance), r_price=r_price, PID=session['PID'])
+        cursor.close()
+
+        
+
+        ## Add milege to table
+        cmd_distance='SELECT distance from Flight where FID = (:aFID)'
+        cursor=g.conn.execute(text(cmd_distance),aFID=FID)
+        distance=0
+        for result in cursor:
+            distance=result[0]
+        cursor.close()
+
+        # Get Company ID
+        cmd_cid = 'SELECT f.cid FROM Sell s JOIN Flight f ON s.fid = f.fid WHERE f.fid = (:aFID) LIMIT 1'
+        cursor = g.conn.execute(text(cmd_cid), aFID=FID)
+        cid = 0
+        for result in cursor:
+            cid = result[0]
+        cursor.close()
+
+        # If this passenger does not have milege for this comapny, add it to the Milege Table
+        cmd_check = 'if NOT exists(select * from Millege where PID=(:PID) and CID=CID(:CID)) BEGIN INSERT INTO Milege(Air_miles,PID,CID) VALUES (0,(:PID),(CID)) END '
+
+        cmd_milege='UPDATE Milege SET air_miles = air_miles + (:adistance) WHERE PID=(:aPID) and CID=(:aCID)'
+        g.conn.execute(text(cmd_milege),aPID=session['PID'], aCID=cid, adistance=distance)
+
+        flash("You successfully purchased the ticket!")
     return redirect("/")
+
+
+@app.route('/showTicket')
+def displayTicket():
+  cmd_st='SELECT T.TID,T.FID,T.AID,F.dep_IATA,F.des_IATA,F.duration,F.distance FROM Ticket T JOIN Flight F ON T.FID=F.FID WHERE T.PID=(:aPID)'
+  cursor = g.conn.execute(text(cmd_st), aPID=session['PID'])
+  r_ticket=[]
+  for result in cursor:
+    r_ticket.append(result)
+  cursor.close()
+
+  context = dict(allTickets = r_ticket)
+  return render_template('tickets.html', **context)
+
 
 
 

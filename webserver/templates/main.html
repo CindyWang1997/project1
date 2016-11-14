@@ -9,6 +9,16 @@
       	</style>
     </head>
 
+    <script type="text/javascript">
+        function showAdd(){
+          addBalanceHtml = '<form method="POST" id="addBal" action="/addBalance">'+ 
+                                '<input type="text" name="addAmount" placeholder="How Much">' +
+                                '<input type="submit" value="Add" name="addBtn">' + 
+                           '</form>';
+          $('#addBalField').html(addBalanceHtml);
+        }
+    </script>
+
   	<body background="{{ url_for('static', filename='mainSearch.jpg') }}">
         <h1 align="center">Welcome, {{ user['name'] }}! Where do you want to go?</h1>
     		<div id = "passengerInfo">  
@@ -16,7 +26,9 @@
     			<p> Gender: {{ user['gender'] }} </p>
     			<p> Email: {{ user['email'] }} </p>
     			<p> Age: {{ user['age'] }} </p>
-    			<p> Balance: {{ user['balance'] }} </p>
+    			<p> Balance: {{ user['balance'] }}   <a onclick="showAdd()" href="#" ">Add Balance</a></p>
+          <p> <a href="/showTicket"> Current Ticket </a></p>
+          <div id='addBalField'></div>
     		</div>
 
         <p><a href="/logout">logout</a></p>
@@ -56,6 +68,18 @@
             		<p>Flight ID <input type="text" name="aFID" placeholder="FID"></p>
             		<p><input type="submit" value="Buy" name="buyBtn"></p>
           	</form>
+        </div>
+
+        <div align="center">
+            <strong>
+                {% with messages = get_flashed_messages() %}
+                   {% if messages %}
+                      {% for message in messages %}
+                         {{ message }}
+                      {% endfor %}
+                   {% endif %}
+                {% endwith %}
+            </strong>
         </div>
 
 
