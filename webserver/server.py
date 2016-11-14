@@ -183,7 +183,7 @@ def do_search_ticket():
   dest = request.args.get('destination')
   output = 'Find Below Available Tickets <br>'
   output = output + \
-          """<table style="width:100%">
+          """<table style="width:80%">
                 <tr>
                   <th>Agency ID</th>
                   <th>Agency Name</th> 
@@ -206,16 +206,16 @@ def do_search_ticket():
 
   for result in cursor:
     output = output + '<tr>' + \
-                        '<th>' + str(result[0]) + '</th>' + \
-                        '<th>' + result[1] + '</th>' + \
-                        '<th>' + result[2] + '</th>' + \
-                        '<th>' + result[3] + '</th>' + \
-                        '<th>' + str(result[4]) + '</th>' + \
-                        '<th>' + str(result[5]) + '</th>' + \
-                        '<th>' + str(result[6]) + '</th>' + \
-                        '<th>' + str(result[7]) + '</th>' + \
-                        '<th>' + str(result[8]) + '</th>' + \
-                        '<th>' + str(result[9]) + '</th>' + \
+                        '<td>' + str(result[0]) + '</td>' + \
+                        '<td>' + result[1] + '</td>' + \
+                        '<td>' + result[2] + '</td>' + \
+                        '<td>' + result[3] + '</td>' + \
+                        '<td>' + str(result[4]) + '</td>' + \
+                        '<td>' + str(result[5]) + '</td>' + \
+                        '<td>' + str(result[6]) + '</td>' + \
+                        '<td>' + str(result[7]) + '</td>' + \
+                        '<td>' + str(result[8]) + '</td>' + \
+                        '<td>' + str(result[9]) + '</td>' + \
                       '<tr>'
 
   output = output + '</table>'  
@@ -290,7 +290,17 @@ def buy():
         cursor.close()
 
         # If this passenger does not have milege for this comapny, add it to the Milege Table
-        cmd_check = 'if NOT exists(select * from Millege where PID=(:PID) and CID=CID(:CID)) BEGIN INSERT INTO Milege(Air_miles,PID,CID) VALUES (0,(:PID),(CID)) END '
+        cmd_check='SELECT COUNT(*) from Milege M where M.PID=(:aPID) AND M.CID=(:aCID)'
+        cursor =g.conn.execute(text(cmd_check),aPID=session['PID'],aCID=cid)
+        check=0
+        for result in cursor:
+            check=result[0]
+        cursor.close()
+    
+        if(check==0):
+            cmd_insert='INSERT INTO Milege(Air_miles,PID,CID) VALUES (0,(:PID),(:CID))'
+            cursor=g.conn.execute(text(cmd_insert),PID=session['PID'],CID=cid)
+        cursor.close()
 
         cmd_milege='UPDATE Milege SET air_miles = air_miles + (:adistance) WHERE PID=(:aPID) and CID=(:aCID)'
         g.conn.execute(text(cmd_milege),aPID=session['PID'], aCID=cid, adistance=distance)
@@ -310,6 +320,91 @@ def displayTicket():
 
   context = dict(allTickets = r_ticket)
   return render_template('tickets.html', **context)
+
+
+
+@app.route('/accountInfo')
+def displayAccount():
+    userInfo = {}
+    
+    # cmd grep user information from Passenger table
+    cmd = 'SELECT gender, email, birth_year, balance FROM Passenger where name = (:aname) LIMIT 1'
+    cursor = g.conn.execute(text(cmd), aname = session['username'])
+    for result in cursor:
+      userInfo['name'] = session['username']
+      userInfo['gender'] = result['gender']
+      userInfo['email'] = result['email']
+      userInfo['age'] = datetime.datetime.now().year - result['birth_year']
+      userInfo['balance'] = result['balance']
+
+    context = dict(user = userInfo)
+    cursor.close()
+    return render_template('accountInfo.html', **context)
+
+
+@app.route('/addBalance', methods=['POST'])
+def addABalance():
+    balance=request.form['addAmount']
+
+    cmd_add = 'UPDATE Passenger SET balance = balance + (:abalance) WHERE PID=(:aPID)'
+    g.conn.execute(text(cmd_add), abalance=balance, aPID=session['PID'])
+    flash("%d dollars added to your account!" %float(balance))
+
+    return redirect('/accountInfo')
+    
+
+@app.route('/whereTo')
+def recommend_place():
+  return render_template('recommendation.html')
+
+
+@app.route('/searchAGO', methods=['GET'])
+def do_search_GO():
+
+  # search database for location
+  loca = request.args.get('currLoc')
+  output = 'These trips might be great for you! <br>'
+  output = output + \
+          """<table style="width:80%">
+                <tr>
+                  <th>Agency ID</th>
+                  <th>Flight ID</th>
+                  <th>Price</th>
+                  <th>Destination</th>
+                </tr>
+          """
+
+  cmd_go = """SELECT S.AID,S.FID,S.price, B.location FROM Sell S JOIN Flight F ON S.FID=F.FID JOIN Airport A ON F.dep_IATA = A.IATA 
+              JOIN Airport B on F.des_IATA = B.IATA, 
+              Passenger P 
+              WHERE A.location=(:aloca) AND S.price <= P.balance AND P.PID=(:aPID)"""
+  cursor = g.conn.execute(text(cmd_go), aloca = loca, aPID = session['PID'])
+
+  for result in cursor:
+    output = output + '<tr>' + \
+                        '<td>' + str(result[0]) + '</td>' + \
+                        '<td>' + result[1] + '</td>' + \
+                        '<td>' + str(result[2]) + '</td>' + \
+                        '<td>' + str(result[3]) + '</td>' + \
+                      '<tr>'
+
+  output = output + '</table>'  
+  cursor.close()
+  return output
+
+
+@app.route('/milege')
+def displayMilege():
+  cmd_sm='SELECT M.CID,C.name,M.air_miles FROM Milege M Join Company C on M.CID = C.CID WHERE M.PID=(:aPID)'
+  cursor = g.conn.execute(text(cmd_sm), aPID=session['PID'])
+  r_milege=[]
+  for result in cursor:
+    r_milege.append(result)
+  cursor.close()
+
+  context = dict(allMileges = r_milege)
+  return render_template('milege.html', **context)
+
 
 
 

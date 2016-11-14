@@ -9,23 +9,22 @@
 			    width: 200px;
 			}
       	</style>
-      	<title>My Ticket</title>
+      	<title>My Milege</title>
     </head>
 
     <body background="{{ url_for('static', filename='mainSearch.jpg') }}">
-    	<h1 align="center">My Tickets</h1>
+    	<h1 align="center">My Milege Earned</h1>
 
     	<nav>
 	    	<ul>
 	            <li><a href="/">Home</a></li>
 	            <li><a href="/accountInfo">My Account</a></li>
-	            <li><a class="active" href="/showTicket">My Tickets</a></li>
-	            <li><a href="/milege">My Milege</a></li>
+	            <li><a href="/showTicket">My Tickets</a></li>
+	            <li><a class="active" href="/milege">My Milege</a></li>
 	            <li><a href="/whereTo">My Recommendations</a></li>
 	            <li><a href="/logout">Log Out</a></li>
 	        </ul>
 	    </nav>
-
 
 	    <br>
 	    <br>
@@ -33,28 +32,21 @@
 		<table align="center">
 			<thead>
 				<tr>
-				    <th>Ticket ID</th>
-				    <th>Flight ID</th>
-				    <th>Agency ID</th>
-				    <th>Departure Airport</th>
-				    <th>Destination Airport</th>
-				    <th>Duration</th>
-				    <th>Distance</th>
+				    <th>Company ID</th>
+				    <th>Company Name</th>
+				    <th>Miles</th>
 		    	</tr>
 			</thead>
 			<tbody>
-				{% for ticket in allTickets %}
+				{% for company in allMileges %}
 			    	<tr>
-			    		<td>{{ticket[0]}}</td> 
-			    		<td>{{ticket[1]}}</td> 
-			    		<td>{{ticket[2]}}</td> 
-			    		<td>{{ticket[3]}}</td> 
-			    		<td>{{ticket[4]}}</td> 
-			    		<td>{{ticket[5]}}</td> 
-			    		<td>{{ticket[6]}}</td>
+			    		<td>{{company[0]}}</td> 
+			    		<td>{{company[1]}}</td> 
+			    		<td>{{company[2]}}</td> 
 			    	</tr>
 		    {% endfor %}
 			</tbody>    
 		</table>
-    </body>
+
+	</body>
 </html>
