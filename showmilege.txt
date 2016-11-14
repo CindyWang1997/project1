@@ -1,0 +1,13 @@
+@app.route('/showMilege')
+def displayMilege():
+  cmd_sm='SELECT M.CID,C.name,C.location,M.air_miles FROM Milege M Join Company C on M.CID = C.CID WHERE M.PID=(:aPID)'
+  cursor = g.conn.excute(text(cmd_sm), aPID=session['PID'])
+  r_milege=[]
+  for result in cursor:
+    r_milege.append(result)
+  cursor.close()
+
+  context = dict(allMileges = r_milege)
+  return render_template('mileges.html', **context)
+  
+  
