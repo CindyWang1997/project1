@@ -2,7 +2,7 @@
 <html lang="en">
   	<head>
       	<meta charset="UTF-8" />
-      	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='ticketStyle.css') }}">
+      	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='ticketStyle.css') }}" media="all">
     </head>
 
   	<body background="{{ url_for('static', filename='mainSearch.jpg') }}">
@@ -37,12 +37,13 @@
           	}
   		  </script>
 
-
         <div id = "searchForm" align="center">
-      		<form id="searchTicket" onsubmit="return searchAirTicket()">
-              <p>Departure City <input type="text" name="departure", placeholder="Departure City"> </p>
-              <p>Destination City <input type="text" name="destination", placeholder="Destination City"> </p>
-              <p><input type="submit" value="Search" name="searchBtn"></p>
+      		<form id="searchTicket" onsubmit="return searchAirTicket()" class="searchform cf">
+              <span class="inline">
+                  <input type="text" name="departure", placeholder="Departure City"> 
+                  <input type="text" name="destination", placeholder="Destination City">
+              </span>
+              <button type="submit" name="searchBtn">Search</button>
           </form>
         	<div id = "searchResult"></div>
         </div>

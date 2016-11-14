@@ -181,7 +181,7 @@ def do_search_ticket():
   # search database for departure and destination id
   depart = request.args.get('departure')
   dest = request.args.get('destination')
-  output = 'Find Below Available Tickets <br>'
+  output = ''
   output = output + \
           """<table style="width:80%">
                 <tr>
