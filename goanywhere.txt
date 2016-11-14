@@ -1,0 +1,69 @@
+##########################################################################
+funtion in server.py
+##########################################################################
+@app.route('/searchAGO', methods=['GET'])
+def do_search_GO():
+
+  # search database for location
+  loca = request.args.get('location')
+  output = 'Find Below Available Tickets <br>'
+  output = output + \
+          """<table style="width:100%">
+                <tr>
+                  <th>Agency ID</th>
+                  <th>Flight ID</th>
+                  <th>Price</th>
+                </tr>
+          """
+
+  cmd_go = """SELECT S.AID,S.FID,S.price FROM Sell S LEFT OUTER JOIN Flight F ON S.FID=F.FID LEFT OUTER JOIN Airport A ON F.dep_IATA=A.IATA,Passenger P WHERE A.location=(:aloca) AND S.price <= P.balance AND P.PID=(:aPID)"""
+  cursor = g.conn.execute(text(cmd_go), aloca = loca, aPID = session['PID'])
+
+  for result in cursor:
+    output = output + '<tr>' + \
+                        '<th>' + str(result[0]) + '</th>' + \
+                        '<th>' + result[1] + '</th>' + \
+                        '<th>' + str(result[2]) + '</th>' + \
+
+                      '<tr>'
+
+  output = output + '</table>'  
+  cursor.close()
+  return output
+
+
+
+
+
+
+#####################################################################
+in main.html?
+#####################################################################
+
+
+function searchAirGO() {
+           		$.ajax({
+  			        type: "GET",
+  			        url: "/searchAGO",
+  			        contentType: "application/xml; charset=utf-8",
+  			        data: $("#searchGO").serialize(),
+  			        success: function(data) {
+  		                $('#searchResult').html(data);
+  		            },
+  		            error: function(jqXHR, textStatus, errorThrown) {
+  			            alert(errorThrown);
+  			        }
+          		});
+           		return false;
+          	}
+  		  </script>
+
+
+        <div id = "searchForm" align="center">
+      		<form id="searchGO" onsubmit="return searchAirGO()">
+              <p>Your Location <input type="text" name="loca", placeholder="Your Location"> </p>
+             
+              <p><input type="submit" value="Search" name="searchBtn"></p>
+          </form>
+        	<div id = "searchResult"></div>
+        </div>
