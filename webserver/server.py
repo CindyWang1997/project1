@@ -40,8 +40,8 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #
 # Swap out the URI below with the URI for the database created in part 2
 #DATABASEURI = "sqlite:///test.db"
-#DATABASEURI = "postgresql://xw2368:s4beh@<104.196.175.120>/postgres"
-DATABASEURI = "mysql+pymysql://root:Yue970217@localhost/airticket"
+DATABASEURI = "postgresql://xw2368:s4beh@104.196.175.120/postgres"
+#DATABASEURI = "mysql+pymysql://root:Yue970217@localhost/airticket"
 
 #
 # This line creates a database engine that knows how to connect to the URI above
@@ -163,7 +163,7 @@ def do_admin_login():
       cmd = 'SELECT PID from Passenger where name = (:aname) LIMIT 1'
       cursor = g.conn.execute(text(cmd), aname = session['username'])
       for result in cursor:
-        session['PID'] = result['PID']
+        session['PID'] = result[0]
       
   return redirect("/")
 
@@ -198,7 +198,7 @@ def do_search_ticket():
                 </tr>
           """
 
-  cmd = """SELECT s.aid, ag.name, f.fid, c.name, f.duration, f.distance, f.dep_IATA, f.des_IATA, s.price, s.seat_remain
+  cmd = """SELECT s.aid, ag.name, f.fid, c.name, f.duration, f.distance, f.dep_IATA, f.des_IATA, s.price, s.seat_remained
         FROM Sell s join Agency ag ON s.aid = ag.aid JOIN Flight f ON s.FID = f.FID JOIN Company c ON c.cid = f.cid WHERE f.FID in
         (SELECT f2.fid from Flight f2 join Airport a on f2.dep_iata = a.iata join Airport b on f2.des_iata = b.iata
         WHERE (a.location = (:aDepart) and b.location = (:aDest)))"""
@@ -235,7 +235,7 @@ def buy():
     FID=request.form['aFID']
 
     # Decrease remaining seats if there still are
-    cmd_remain = 'SELECT `seat_remain` FROM Sell s WHERE s.AID=(:aAID) and s.FID=(:aFID) LIMIT 1'
+    cmd_remain = 'SELECT s.seat_remained FROM Sell s WHERE s.AID=(:aAID) and s.FID=(:aFID) LIMIT 1'
     cursor = g.conn.execute(text(cmd_remain), aAID=AID, aFID=FID)
     r_remain=0
     for result in cursor:
@@ -249,7 +249,7 @@ def buy():
         flash('This Ticket Is Not Available!')
 
     else:
-        cmd_seat='UPDATE Sell s SET seat_remain = seat_remain -1 where s.AID=(:aAID) and s.FID=(:aFID)'
+        cmd_seat='UPDATE Sell s SET seat_remained = seat_remained -1 where s.AID=(:aAID) and s.FID=(:aFID)'
         g.conn.execute(text(cmd_seat), aAID=AID, aFID=FID)
 
         # Cannot just delete row from Sell othewise, ticket foreign key constraint fails
@@ -264,10 +264,10 @@ def buy():
         cursor = g.conn.execute(text(cmd_price), aAID=AID, aFID=FID)
         r_price=0     # Ticket price
         for result in cursor:
-            r_price=result['price']
+            r_price=result[0]
         cursor.close()
 
-        cmd_balance='UPDATE Passenger p SET p.balance = p.balance - (:r_price) where p.PID=(:PID)'
+        cmd_balance='UPDATE Passenger SET balance = balance - (:r_price) where PID=(:PID)'
         cursor = g.conn.execute(text(cmd_balance), r_price=r_price, PID=session['PID'])
         cursor.close()
 

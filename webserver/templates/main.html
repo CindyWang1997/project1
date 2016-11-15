@@ -39,20 +39,20 @@
 
         <div id = "searchForm" align="center">
       		<form id="searchTicket" onsubmit="return searchAirTicket()" class="searchform cf">
-              <span class="inline">
-                  <input type="text" name="departure", placeholder="Departure City"> 
-                  <input type="text" name="destination", placeholder="Destination City">
-              </span>
-              <button type="submit" name="searchBtn">Search</button>
-          </form>
+              		<span class="inline">
+                  		<input type="text" name="departure", placeholder="Departure City"> 
+                  		<input type="text" name="destination", placeholder="Destination City">
+              		</span>
+              		<button type="submit" name="searchBtn">Search</button>
+         	</form>
         	<div id = "searchResult"></div>
         </div>
 
         <div id = "buyForm" align="center">
-          	<form method="POST" id="buyTicket" action="/buyATicket">
+          	<form method="POST" id="buyTicket" action="/buyATicket" class="buyform cf">
             		<p>Agency ID <input type="text" name="aAID" placeholder="AID"></p>
             		<p>Flight ID <input type="text" name="aFID" placeholder="FID"></p>
-            		<p><input type="submit" value="Buy" name="buyBtn"></p>
+            		<p><button type="submit" name="buyBtn">Buy</button>
           	</form>
         </div>
 
