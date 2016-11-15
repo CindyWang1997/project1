@@ -1,0 +1,193 @@
+CREATE TABLE Passenger(
+	PID int,
+	name text,
+	gender text,
+	email text UNIQUE,
+	birth_year int,
+	balance float,
+	PRIMARY KEY(PID)
+);
+
+INSERT INTO Passenger (PID, name, gender, email, birth_year, balance)
+VALUES 
+(10001,'Eugene Wu','male','eugenewu@gmail.com',1990,200),
+(10002,'Bob Dylan','male','bob123@gmail.com',1980,100000),
+(10003,'Xinyue Wang','female','xy_wang@gmail.com',1999,200),
+(10004,'Andy Warhol','male','andy_warhol@gmail.com',1970,100),
+(10005,'Donald Trump','male','dt@gmail.com',1950,200000),
+(10006,'Kim Kardashian','female','kk@gmail.com',1994,20000),
+(10007,'MR.X','female','mrx@outlook.com','1920',123123),
+(10008,'Jeb','male','jebbush@gmail.com',1963,10000),
+(10009,'Timberlake','male','timberlake@outlood.com',1990,2892),
+(10010,'James J. Valentini','male','jjv@columbia.edu',1990,50);
+
+
+CREATE TABLE Agency(
+	AID int,
+	name text,
+	PRIMARY KEY(AID)
+);
+
+INSERT INTO Agency (AID, name)
+VALUES 
+(20001,'Atlantic Ocean Travel'),
+(20002,'Pacific Ocean Travel'),
+(20003,'Indian Ocean Travel'),
+(20004,'Arctic Ocean Travel'),
+(20005,'Trump Travel'),
+(20006,'Atlantic Business'),
+(20007,'Pacific Business'),
+(20008,'Indian Business'),
+(20009,'Arctic Business'),
+(20010,'Trump Business');
+
+
+CREATE TABLE Sell(
+	AID int,
+	FID text,
+	price float,
+	seat_remain int,
+	PRIMARY KEY(AID,FID)
+);
+INSERT INTO Sell (AID,FID,price,seat_remain)
+VALUES 
+(20001,'DL0001',200,50),
+(20002,'DL0001',300,34),
+(20003,'DL0002',400,23),
+(20004,'DL0003',500,32),
+(20001,'DL0004',320,46),
+(20001,'AA0001',340,54),
+(20008,'AA0001',540,62),
+(20001,'IA0001',360,2),
+(20001,'SA0001',640,84),
+(20005,'TA0001',870,0);
+
+CREATE TABLE Company(
+	CID int,
+	name text,
+	location text,
+	PRIMARY KEY(CID)
+);
+
+INSERT INTO Company (CID, name, location)
+VALUES 
+(30001,'Delta','Atlanta'),
+(30002,'United Airline','New York'),
+(30003,'JetBlue','New York'),
+(30004,'American Airline','New York'),
+(30005,'Asian Airline','Seoul'),
+(30006,'Scandinavian Airlines','Stockholm'),
+(30007,'Eastern Airline','Shanghai'),
+(30008,'Mecixo Airline','New Mexico City'),
+(30009,'Iceland Airline','Reykjavik'),
+(30010,'Trump Airline','Trump City');
+
+CREATE TABLE Ticket(
+	TID text,
+	AID int,
+	FID text,
+	PID int,
+	PRIMARY KEY(TID),
+	FOREIGN KEY(AID,FID) REFERENCES Sell(AID,FID),
+	FOREIGN KEY(PID) REFERENCES Passenger(PID)
+);
+
+INSERT INTO Ticket (TID, AID, FID,PID)
+VALUES 
+('AOT0001',20001,'DL0001',10001),
+('POT0002',20002,'DL0001',10001),
+('IOT0003',20003,'DL0002',10001),
+('AOT0004',20004,'DL0003',10002),
+('ATO0002',20001,'DL0004',10002),
+('ATO0003',20001,'AA0001',10003),
+('ATO0004',20001,'AA0001',10004),
+('ATO0005',20001,'IA0001',10005),
+('ATO0006',20001,'SA0001',10006),
+('TB0001',20005,'TA0001',10007);
+
+
+
+CREATE TABLE Airport(
+	IATA text,
+	location text,
+	Status text,
+	PRIMARY KEY(IATA)
+);
+INSERT INTO Airport (IATA, location, Status)
+VALUES 
+('JFK','New York','open'),
+('EWR','New York','open'),
+('LGA','New York','open'),
+('LAX','Los Angeles','open'),
+('ATL','Atlanta','open'),
+('ARN','Stockholm','open'),
+('KEF','Reykjavik','open'),
+('SHA','Shanghai','open'),
+('ICN','Seoul','open'),
+('TTT','Trump City','open');
+
+
+CREATE TABLE Flight(
+	FID text,
+	Valid int,
+	duration float,
+	distance int,
+	CID int,
+	dep_IATA text,
+	des_IATA text,
+	PRIMARY KEY(FID),
+	FOREIGN KEY (CID) REFERENCES Company,
+	FOREIGN KEY (dep_IATA) REFERENCES Airport,
+	FOREIGN KEY (des_IATA) REFERENCES Airport
+);
+
+INSERT INTO Flight (FID, Valid, duration,distance,CID,dep_IATA,des_IATA)
+VALUES 
+('DL0001',1,120,800,30001,'JFK','LAX'),
+('DL0002',1,180,1200,30001,'JFK','ATL'),
+('DL0003',1,240,2400,30001,'ATL','LAX'),
+('DL0004',1,240,2300,30001,'LAX','LAX'),
+('AA0001',1,120,1100,30004,'EWR','LGA'),
+('AA0002',1,60,500,30004,'JFK','ATL'),
+('AA0003',1,120,1000,30004,'JFK','ICN'),
+('IA0001',1,1200,9000,30009,'KEF','LAX'),
+('SA0001',1,800,6000,30006,'ARN','JFK'),
+('TA0001',1,20,80,30010,'JFK','TTT');
+
+
+
+
+
+CREATE TABLE Milege(
+	Air_miles int,
+	PID int,
+	CID int,
+	FOREIGN KEY (PID) REFERENCES Passenger,
+	FOREIGN KEY (CID) REFERENCES Company,
+	PRIMARY KEY (PID,CID)
+);
+
+INSERT INTO Milege (Air_miles,PID,CID)
+VALUES 
+(800,10001,30001),
+(200,10001,30002),
+(0,10001,30003),
+(0,10002,30001),
+(200,10003,30004),
+(1500,10004,30005),
+(230,10005,30006),
+(6350,10006,30007),
+(8340,10007,30008),
+(0,10010,30010);
+
+
+
+INSERT INTO Flight (FID, Valid, duration,distance,CID,dep_IATA,des_IATA)
+VALUES 
+('TA0002',1,120,800,30010,'JFK','LAX'),
+('AA0004',1,122,810,30002,'JFK','LAX');
+
+INSERT INTO Sell (AID,FID,price,seat_remain)
+VALUES 
+(20005,'TA0002',890,1),
+(20002,'AA0004',900,10);
