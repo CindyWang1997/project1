@@ -111,6 +111,7 @@ CREATE TABLE Airport(
 	IATA text,
 	location text,
 	Status text,
+	CHECK Status ='open',
 	PRIMARY KEY(IATA)
 );
 INSERT INTO Airport (IATA, location, Status)
